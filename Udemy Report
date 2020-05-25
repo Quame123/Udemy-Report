@@ -1,0 +1,228 @@
+# Analysis of Udemy Courses Dataset
+
+#lets import the libraries we may need
+
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sb
+import sklearn
+from scipy import stats
+
+#We'll now read our data and transform into a dataframe
+df = pd.read_csv('udemy_courses.csv')
+#print(df)
+
+# Let's check our data for null values
+
+##Lets get see if there are null values and count the number of null values
+
+print(df.info())
+
+df.isnull().sum()
+
+##  Our data has no null values. lets now explore the data
+
+Certain columns may not help with the analyses so let's drop those columns and call the new table cleaned data
+
+cleaned_data = df.drop(['course_id','course_title','url'], axis=1)
+cleaned_data
+
+#### Let us describe our data
+
+cleaned_data.describe()
+
+Let us count the number of courses paid
+
+#### Mean values for each subject
+
+subject_groups = cleaned_data.groupby(cleaned_data['subject'])
+subject_groups.mean()
+
+### Maximum values
+
+subject_groups.max()
+
+### Minimum values per subject
+
+subject_groups.min()
+
+# Data Visualization
+
+Let us look at the distribution of course ID
+
+plt.hist(df["course_id"],color='green',edgecolor="yellow")
+
+#adding titles
+plt.title('Histogram for course ID')
+plt.ylabel('Class Frequncy')
+plt.xlabel('ID Class')
+
+plt.show()
+
+Let is count the free and paid courses
+
+df["is_paid"].value_counts()
+
+Let us count the number of subjects
+
+df["subject"].value_counts()
+
+Lets plot a bar graph for the number of counts for each subject
+
+sb.set(style="whitegrid")
+labels = "Business Finance","Graphic Design","Musical Instruments","Web Development"
+ax = sb.countplot(x="subject", data=df)
+ax.set_xticklabels(rotation=-25,labels=labels)
+
+#adding titles
+plt.title('Counts of the Subjects')
+
+plt.show()
+
+Let us plot a pie chat for this
+
+#plotting a pie chat for the subjects
+labels = "Web Development","Business Finance","Musical Instruments","Graphic Design"
+breakup=(0.09,0.09,0.09,0.09)
+fig,ax=plt.subplots()
+ax.pie(df["subject"].value_counts(),explode=breakup,labels=labels,autopct='%1.1f%%',startangle=90,shadow=True)
+ax.axis('equal')
+
+#adding titles
+plt.title('Pie chat showing the subject distribution')
+
+
+plt.show()
+
+Let us the see the  plot of the the paid and free courses
+
+ax = sb.countplot(x="is_paid", data=df)
+
+#adding titles
+plt.title('Number of paid and unpaid courses')
+
+plt.show()
+
+Let us plot a pie chat for the is_paid column
+
+labels = "True","False"
+fig,ax=plt.subplots()
+breakup=(0.09,0.09)
+ax.pie(df["is_paid"].value_counts(), explode=breakup,labels=labels,autopct='%1.1f%%',startangle=90,shadow=True)
+ax.axis('equal')
+
+#adding titles
+plt.title('Percetages of paid and unpaid courses')
+
+plt.show()
+
+Lets count the number of entries per level
+
+df["level"].value_counts()
+
+Lets plot a bar graph for the number of counts for each level
+
+# Lets plot this in a bar graph
+labels = "All levels","Intermediate","Beginner Level","Expert Level"
+sb.set(style="whitegrid")
+ax = sb.countplot(x="level", data=df)
+ax.set_xticklabels(rotation=-25,labels=labels)
+
+#adding titles
+plt.title('Counts per course level')
+
+plt.show()
+
+Let us combine the level and subject into a single graph
+
+# Lets plot this in a bar graph
+labels ="Business Finance","Graphic Design","Musical Instruments","Web Development"
+sb.set(style="whitegrid")
+ax = sb.countplot(x="subject", hue = "level", data=df)
+ax.set_xticklabels(rotation=-25,labels=labels)
+
+#adding titles
+plt.title('Courses and their levels')
+
+
+plt.show()
+
+#### Let us find out if there is are relationships between certain columns to test our hypothses in our data
+
+
+a=cleaned_data
+b=sb.PairGrid(a)
+b.map(plt.scatter)
+
+plt.show()
+
+#Lets test for price and number of subcribers
+
+slope, intercept, r_value, p_value, std_err = stats.linregress(cleaned_data['num_subscribers'],cleaned_data['price'])
+
+Lin_reg_a = sb.regplot(x ='num_subscribers',y='price',data = cleaned_data,
+                       line_kws={'label':"y={0:.1f}x+{1:.1f}".format(slope,intercept)})
+
+Lin_reg_a.legend()
+
+#adding titles
+plt.title('Relationship between Price and Number of Subscribers')
+
+print('r_value is', r_value)
+
+
+
+
+#Lets test for price and number of reviews
+slope, intercept, r_value, p_value, std_err = stats.linregress(cleaned_data['num_reviews'],cleaned_data['price'])
+
+Lin_reg_b = sb.regplot(x ='num_reviews',y='price',data = cleaned_data,
+                       line_kws={'label':"y={0:.1f}x+{1:.1f}".format(slope,intercept)})
+
+Lin_reg_b.legend()
+
+#adding titles
+plt.title('Relationship between Price and Number of Reviews')
+
+print('r_value is', r_value)
+
+#Lets test for number of lectures and content duration
+
+slope, intercept, r_value, p_value, std_err = stats.linregress(cleaned_data['num_lectures'],cleaned_data['content_duration'])
+
+Lin_reg_c = sb.regplot(x ='num_lectures',y='content_duration',data = cleaned_data,
+                       line_kws={'label':"y={0:.1f}x+{1:.1f}".format(slope,intercept)})
+
+Lin_reg_c.legend()
+
+#adding titles
+plt.title('Relationship between number of lectures and content duration')
+
+print('r_value is', r_value)
+
+#Lets test for reviews and subscribers
+slope, intercept, r_value, p_value, std_err = stats.linregress(cleaned_data['num_reviews'],cleaned_data['num_subscribers'])
+
+Lin_reg_d= sb.regplot(x ='num_reviews',y='num_subscribers',data = cleaned_data,
+                       line_kws={'label':"y={0:.1f}x+{1:.1f}".format(slope,intercept)})
+
+Lin_reg_d.legend()
+
+#adding titles
+plt.title('Relationship between number of reviews and number of subscribers')
+
+print('r_value is', r_value)
+
+#Lets test for price and content duration
+slope, intercept, r_value, p_value, std_err = stats.linregress(cleaned_data['content_duration'],cleaned_data['price'])
+
+Lin_reg_f= sb.regplot(x ='content_duration',y='price',data = cleaned_data,
+                       line_kws={'label':"y={0:.1f}x+{1:.1f}".format(slope,intercept)})
+
+Lin_reg_f.legend()
+
+#adding titles
+plt.title('Relationship between Price and content duration')
+
+print('r_value is', r_value)
